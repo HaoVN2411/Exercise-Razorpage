@@ -3,10 +3,19 @@
 
 @if (HttpContext.Session.GetString("Role") == 1.ToString())
 {
+    if (HttpContext.Session.GetString("Price") != null)
+    {
+        Model.Price = int.Parse(HttpContext.Session.GetString("Price"));
+    }
+    if (HttpContext.Session.GetString("EyeglassesDescription") != null)
+    {
+        Model.EyeglassesDescription = HttpContext.Session.GetString("EyeglassesDescription");
+    }
+
     <form method="post" asp-page-handler="Search">
         <div>Search</div>
-        Price: <input type="number" asp-for="Price" value="">
-        EyeglassesDescription: <input type="text" asp-for="EyeglassesDescription" value="">
+        Price: <input type="number" asp-for="Price" value="@Model.Price">
+        EyeglassesDescription: <input type="text" asp-for="EyeglassesDescription" value="@Model.EyeglassesDescription">
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
 
@@ -15,7 +24,10 @@
     </form>
 
 }
-
+@if (HttpContext.Session.GetString("Email") == null)
+{
+    Redirect("Login");
+}
 <div>
     <table>
         <thead>
@@ -42,12 +54,12 @@
                     <td>@eyeglass.Price</td>
                     <td>@eyeglass.Quantity</td>
                     <td>@eyeglass.CreatedDate</td>
-                    <td>@(eyeglass.LensType?.LensTypeName?? "Unknown")</td>
+                    <td>@(eyeglass.LensType?.LensTypeName ?? "Unknown")</td>
                     <td>
                         @if (HttpContext.Session.GetString("Role") == 1.ToString())
                         {
                             <form method="post" asp-page-handler="Delete">
-                                <input type="hidden" asp-for="IdToDelete" value="@eyeglass.EyeglassesId"/>
+                                <input type="hidden" asp-for="IdToDelete" value="@eyeglass.EyeglassesId" />
                                 <button type="submit">Delete</button>
                             </form>
                         }

@@ -33,8 +33,20 @@ namespace Eyeglasses_VuNhatHao.Pages
         }
         public IActionResult OnPostGetList()
         {
-            eyeglasses = _unitOfWork.EyeGlassRepository.Get(includeProperties: "LensType", pageIndex: pageIndex, pageSize: 4).ToList();
-            totalPage = (int)Math.Ceiling((double)_unitOfWork.EyeGlassRepository.Count() / 4);
+            if(HttpContext.Session.GetString("Price") != null)
+            {
+                Price = int.Parse(HttpContext.Session.GetString("Price"));
+            }
+            if(HttpContext.Session.GetString("EyeglassesDescription") != null)
+            {
+                EyeglassesDescription = HttpContext.Session.GetString("EyeglassesDescription");
+            }
+
+            eyeglasses = _unitOfWork.EyeGlassRepository.Get(x => (Price == null || x.Price == Price)
+            || (string.IsNullOrEmpty(EyeglassesDescription) || x.EyeglassesDescription.Contains(EyeglassesDescription)),
+                includeProperties: "LensType", pageIndex: pageIndex, pageSize: 4).ToList();
+            totalPage = (int)Math.Ceiling((double)_unitOfWork.EyeGlassRepository.Count(x => (Price == null || x.Price == Price)
+            || (string.IsNullOrEmpty(EyeglassesDescription) || x.EyeglassesDescription.Contains(EyeglassesDescription))) / 4);
             return Page();
         }
 
@@ -43,7 +55,26 @@ namespace Eyeglasses_VuNhatHao.Pages
             eyeglasses = _unitOfWork.EyeGlassRepository.Get(x =>
             (Price == null || x.Price == Price)
             || (string.IsNullOrEmpty(EyeglassesDescription) || x.EyeglassesDescription.Contains(EyeglassesDescription)),
-            includeProperties: "LensType").ToList();
+            includeProperties: "LensType", pageIndex: pageIndex, pageSize: 4).ToList();
+
+            totalPage = (int)Math.Ceiling((double)_unitOfWork.EyeGlassRepository.Count(x => (Price == null || x.Price == Price)
+            || (string.IsNullOrEmpty(EyeglassesDescription) || x.EyeglassesDescription.Contains(EyeglassesDescription))) / 4);
+            if (Price != null)
+            {
+                HttpContext.Session.SetString("Price", Price.ToString());
+            }
+            else
+            {
+                HttpContext.Session.Remove("Price");
+            }
+            if (EyeglassesDescription != null)
+            {
+                HttpContext.Session.SetString("EyeglassesDescription", EyeglassesDescription);
+            }
+            else
+            {
+                HttpContext.Session.Remove("EyeglassesDescription");
+            }
             return Page();
         }
 
